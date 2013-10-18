@@ -3,8 +3,12 @@
 <body>
 
 <h2>
-  Reaction Visualizer
+  Reaction Visualizer (on port 27334 w/ Litmining Reactions)
 </h2>
+
+<p>
+  Instructions: To view a reaction go to /rxn/(rxn_id).
+</p>
 
 {% if reaction %}
 <table border="1">
@@ -30,6 +34,7 @@
 </tr>
 </table>
 <img src="{{ url_for('static', filename='reaction.png') }}">
+<p>Note: You may have to refresh the page again to reload the image.</p>
 <h3>Substrates</h3>
 {% for chemical in substrates %}
 <table border="1">
@@ -84,7 +89,7 @@
 {% endfor %}
 {% else %}
 <p>
-  Reaction not found. Please enter a valid reaction id /rxn/(rxn_id).
+  Reaction not found.
 </p>
 {% endif %}
 
