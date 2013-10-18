@@ -13,11 +13,12 @@ CHEMICALS = DB.actv01['chemicals']
 REACTIONS = DB.actv01['actfamilies']
 
 
-def generate_reaction(substrates, products):
-    output_path = 'static/reaction.png'
+def generate_reaction(substrate_smiles, product_smiles):
+    output_file = 'reaction.png'
+    output_path = 'static/%s' % output_file
     try:
-        substrates = [INDIGO.loadMolecule(x) for x in substrates]
-        products = [INDIGO.loadMolecule(x) for x in products]
+        substrates = [INDIGO.loadMolecule(x) for x in substrate_smiles]
+        products = [INDIGO.loadMolecule(x) for x in product_smiles]
     except IndigoException:
         return False
     rxn = INDIGO.createReaction()
@@ -25,17 +26,19 @@ def generate_reaction(substrates, products):
         rxn.addReactant(s)
     for p in products:
         rxn.addProduct(p)
-    INDIGO.setOption("render-output-format", "png")
-    INDIGO.setOption("render-image-size", 1000, 300)
+    INDIGO.setOption('render-output-format', 'png')
+    INDIGO.setOption('render-image-size', 1000, 300)
+    INDIGO.setOption('render-comment', '%s -> %s' %
+                     (substrate_smiles, product_smiles))
     RENDERER.renderToFile(rxn, output_path)
-    return output_path
+    return output_file
 
 
 def generate_ero(query_reaction):
     output_path = 'static/ero.png'
     rxn = INDIGO.loadQueryReaction(query_reaction)
-    INDIGO.setOption("render-output-format", "png")
-    INDIGO.setOption("render-image-size", 1000, 300)
+    INDIGO.setOption('render-output-format', 'png')
+    INDIGO.setOption('render-image-size', 1000, 300)
     RENDERER.renderToFile(rxn, output_path)
     return output_path
 

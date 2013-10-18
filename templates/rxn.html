@@ -33,7 +33,7 @@
   <td>{{ reaction['organisms']  }}</td>
 </tr>
 </table>
-<img src="{{ url_for('static', filename='reaction.png') }}">
+<img src="{{ url_for('static', filename=rxn_img) }}">
 <p>Note: You may have to refresh the page again to reload the image.</p>
 <h3>Substrates</h3>
 {% for chemical in substrates %}
