@@ -100,7 +100,14 @@
   Reaction not found.
 </p>
 <h3>Report Reactions</h3>
-{{ report_reactions }}
+<table border="1">
+{% for rep in report_reactions %}
+  <tr>
+    <td>{{ rep[0] }}</td>
+    <td>{{ rep[1] }}</td>
+  </tr>
+{% endfor %}
+</table>
 {% endif %}
 
 </body>

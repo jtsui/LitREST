@@ -16,6 +16,7 @@ REACTIONS = DB.actv01['actfamilies']
 FILTER_INFER = json.load(open('../data/infer_ero_pubmed.json'))
 FILTER_APPLY = json.load(open('../data/apply_ero_pubmed.json'))
 REPORT_REACTIONS = json.load(open('../data/report_reactions.json'))
+REPORT_REACTIONS = [(x, y) for x, y in REPORT_REACTIONS if isinstance(y, list) and x != 'Reactions matched']
 pr = pprint.PrettyPrinter(indent=2)
 
 
@@ -67,9 +68,9 @@ def rxn(rxn_id=None):
         substrates = [CHEMICALS.find_one(product['pubchem'])
                       for product in reaction['enz_summary']['substrates']]
         rxn_img = generate_reaction(substrates, products)
-        filter_apply = pr.pformat(FILTER_APPLY.get(reaction['_id'], []))
-        filter_infer = pr.pformat(FILTER_INFER.get(reaction['_id'], []))
-    return render_template('rxn.html', reaction=reaction, substrates=substrates, products=products, rxn_img=rxn_img, filter_infer=filter_infer, filter_apply=filter_apply, report_reactions=pr.pformat(REPORT_REACTIONS))
+        filter_apply = pr.pformat(FILTER_APPLY.get(rxn_id, []))
+        filter_infer = pr.pformat(FILTER_INFER.get(rxn_id, []))
+    return render_template('rxn.html', reaction=reaction, substrates=substrates, products=products, rxn_img=rxn_img, filter_infer=filter_infer, filter_apply=filter_apply, report_reactions=REPORT_REACTIONS)
 
 
 if __name__ == '__main__':
