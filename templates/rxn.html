@@ -32,6 +32,10 @@
   <td>Organisms</td>
   <td>{{ reaction['organisms']  }}</td>
 </tr>
+<tr>
+  <td>Metadata</td>
+  <td>{{ reaction['metadata']  }}</td>
+</tr>
 </table>
 <img src="{{ url_for('static', filename=rxn_img) }}">
 <p>Note: You may have to refresh the page again to reload the image.</p>
@@ -87,6 +91,10 @@
 </table>
 <br>
 {% endfor %}
+<h3>Results from Inferring ERO</h3>
+{{ filter_infer  }}
+<h3>Results from Applying ERO</h3>
+{{ filter_apply  }}
 {% else %}
 <p>
   Reaction not found.
