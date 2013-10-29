@@ -65,8 +65,8 @@ def rxn(rxn_id=None):
         substrates = [CHEMICALS.find_one(product['pubchem'])
                       for product in reaction['enz_summary']['substrates']]
         rxn_img = generate_reaction(substrates, products)
-        filter_apply = pr.pformat(FILTER_APPLY.get(rxn_id, []))
-        filter_infer = pr.pformat(FILTER_INFER.get(rxn_id, []))
+        filter_apply = FILTER_APPLY.get(rxn_id, [])
+        filter_infer = FILTER_INFER.get(rxn_id, [])
     return render_template('rxn.html', reaction=reaction, substrates=substrates, products=products, rxn_img=rxn_img, filter_infer=filter_infer, filter_apply=filter_apply, report_reactions=REPORT_REACTIONS)
 
 

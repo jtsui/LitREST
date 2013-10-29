@@ -34,11 +34,23 @@
 </tr>
 <tr>
   <td>Metadata</td>
-  <td>{{ reaction['metadata']  }}</td>
+  <td>
+    {% for res in reaction['metadata'] %}
+    <table border="0">
+      {% for k, v in res.iteritems() %}
+        <tr>
+          <td>{{ k }}</td>
+          <td>{{ v }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+    <br>
+    {% endfor %}
+  </td>
 </tr>
 </table>
+<br>
 <img src="{{ rxn_img }}">
-<p>Note: You may have to refresh the page again to reload the image.</p>
 <h3>Substrates</h3>
 {% for chemical in substrates %}
 <table border="1">
@@ -92,9 +104,27 @@
 <br>
 {% endfor %}
 <h3>Results from Inferring ERO</h3>
-{{ filter_infer  }}
+{% for res in filter_infer %}
+<table border="1">
+  {% for k, v in res.iteritems() %}
+    <tr>
+      <td>{{ k }}</td>
+      <td>{{ v }}</td>
+    </tr>
+  {% endfor %}
+</table>
+<br>
+{% endfor %}
 <h3>Results from Applying ERO</h3>
-{{ filter_apply  }}
+<table border="1">
+  <tr>
+    <td>{{ filter_apply[0] }}</td>
+    <td>{{ filter_apply[1] }}</td>
+    <td>{{ filter_apply[2] }}</td>
+  </tr>
+</table>
+<br>
+
 {% else %}
 <p>
   Reaction not found.
