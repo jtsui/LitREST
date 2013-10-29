@@ -6,6 +6,7 @@ from indigo.indigo_renderer import *
 from indigo.indigo_inchi import *
 from pymongo import *
 import pprint
+import base64
 
 INDIGO = Indigo()
 RENDERER = IndigoRenderer(INDIGO)
@@ -16,11 +17,12 @@ REACTIONS = DB.actv01['actfamilies']
 FILTER_INFER = json.load(open('../data/infer_ero_pubmed.json'))
 FILTER_APPLY = json.load(open('../data/apply_ero_pubmed.json'))
 REPORT_REACTIONS = json.load(open('../data/report_reactions.json'))
-REPORT_REACTIONS = [(x, y) for x, y in REPORT_REACTIONS if isinstance(y, list) and x != 'Reactions matched']
+REPORT_REACTIONS = [(x, y)
+                    for x, y in REPORT_REACTIONS if isinstance(y, list) and x != 'Reactions matched']
 pr = pprint.PrettyPrinter(indent=2)
 
 
-def generate_reaction(substrates, products):
+def generate_reaction(substrates, products, width=1000, height=300):
     substrate_indigos = [
         INDIGO_INCHI.loadMolecule(x['InChI']) for x in substrates]
     products_indigos = [
@@ -31,29 +33,24 @@ def generate_reaction(substrates, products):
     for p in products_indigos:
         rxn.addProduct(p)
     INDIGO.setOption('render-output-format', 'png')
-    INDIGO.setOption('render-image-size', 1000, 300)
+    INDIGO.setOption('render-image-size', width, height)
     INDIGO.setOption('render-comment', '%s -> %s' %
                      ([x['_id'] for x in substrates], [x['_id'] for x in products]))
-    RENDERER.renderToFile(rxn, 'static/reaction.png')
-    return 'reaction.png'
+    t = RENDERER.renderToBuffer(rxn)
+    return 'data:image/png;base64,%s' % base64.b64encode(t)
 
 
-def generate_ero(query_reaction):
-    output_path = 'static/ero.png'
+def generate_ero(query_reaction, width=1000, height=300):
     rxn = INDIGO.loadQueryReaction(query_reaction)
     INDIGO.setOption('render-output-format', 'png')
-    INDIGO.setOption('render-image-size', 1000, 300)
-    RENDERER.renderToFile(rxn, output_path)
-    return output_path
+    INDIGO.setOption('render-image-size', width, height)
+    t = RENDERER.renderToBuffer(rxn)
+    return 'data:image/png;base64,%s' % base64.b64encode(t)
 
 
 @app.route('/')
 def root():
     return render_template('root.html')
-
-
-def inchi_to_smiles(inchi):
-    return INDIGO_INCHI.loadMolecule(inchi).smiles()
 
 
 @app.route('/rxn/')
