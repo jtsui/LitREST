@@ -109,21 +109,66 @@
   {% for k, v in res.iteritems() %}
     <tr>
       <td>{{ k }}</td>
-      <td>{{ v }}</td>
+      <td>
+        {% if k == 'EROIMG' %}
+          <img src="{{ v }}">
+        {% else %}
+          {{ v }}
+        {% endif %}
+      </td>
     </tr>
   {% endfor %}
 </table>
 <br>
 {% endfor %}
 <h3>Results from Applying ERO</h3>
-<table border="1">
-  <tr>
-    <td>{{ filter_apply[0] }}</td>
-    <td>{{ filter_apply[1] }}</td>
-    <td>{{ filter_apply[2] }}</td>
-  </tr>
-</table>
-<br>
+{% if filter_apply %}
+  <table border="1">
+    <tr>
+      <td>Input Chemical</td>
+      <td>
+        <table border="0">
+          <tr><td><img src="{{ filter_apply['inputimg'] }}"></td></tr>
+          <tr><td>{{ filter_apply['input'] }}</td></tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td>ERO</td>
+      <td>
+        <table border="0">
+          <tr><td><img src="{{ filter_apply['eroimg'] }}"></td></tr>
+          <tr><td>{{ filter_apply['ero'] }}</td></tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td>Forward</td>
+      {% for forward in filter_apply['forward'] %}
+        <td>
+          <table border="0">
+            <tr><td><img src="{{ forward[1] }}"></td></tr>
+            <tr><td>{{ forward[0] }}</td></tr>
+          </table>
+        </td>
+      {% endfor %}
+    </tr>
+    <tr>
+      <td>Reverse</td>
+      {% for reverse in filter_apply['reverse'] %}
+        <td>
+          <table border="0">
+            <tr><td><img src="{{ reverse[1] }}"></td></tr>
+            <tr><td>{{ reverse[0] }}</td></tr>
+          </table>
+        </td>
+      {% endfor %}
+    </tr>
+  </table>
+  <br>
+{% else %}
+  None
+{% endif %}
 
 {% else %}
 <p>

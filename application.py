@@ -14,6 +14,8 @@ INDIGO_INCHI = IndigoInchi(INDIGO)
 DB = Connection('pathway.berkeley.edu', 27334)
 CHEMICALS = DB.actv01['chemicals']
 REACTIONS = DB.actv01['actfamilies']
+DB_EROS = Connection('pathway.berkeley.edu', 27017)
+EROS = DB_EROS.actv01['eros']
 FILTER_INFER = json.load(open('../data/infer_ero_pubmed.json'))
 FILTER_APPLY = json.load(open('../data/apply_ero_pubmed.json'))
 REPORT_REACTIONS = json.load(open('../data/report_reactions.json'))
@@ -40,11 +42,32 @@ def generate_reaction(substrates, products, width=1000, height=300):
     return 'data:image/png;base64,%s' % base64.b64encode(t)
 
 
-def generate_ero(query_reaction, width=1000, height=300):
+def generate_ero(query_reaction, width=600, height=200):
     rxn = INDIGO.loadQueryReaction(query_reaction)
     INDIGO.setOption('render-output-format', 'png')
     INDIGO.setOption('render-image-size', width, height)
+    INDIGO.setOption('render-comment', '')
     t = RENDERER.renderToBuffer(rxn)
+    return 'data:image/png;base64,%s' % base64.b64encode(t)
+
+
+def generate_chem_inchi(inchi, width=150, height=150):
+    chem = INDIGO_INCHI.loadMolecule(inchi)
+    INDIGO.setOption('render-output-format', 'png')
+    INDIGO.setOption('render-image-size', width, height)
+    INDIGO.setOption('render-comment', '')
+    t = RENDERER.renderToBuffer(chem)
+    return 'data:image/png;base64,%s' % base64.b64encode(t)
+
+
+def generate_chems_smiles(smiles, width=450, height=150):
+    arr = INDIGO.createArray()
+    for x in smiles:
+        arr.arrayAdd(INDIGO.loadMolecule(x))
+    INDIGO.setOption('render-output-format', 'png')
+    INDIGO.setOption('render-image-size', width, height)
+    INDIGO.setOption('render-comment', '')
+    t = RENDERER.renderGridToBuffer(arr, None, len(smiles))
     return 'data:image/png;base64,%s' % base64.b64encode(t)
 
 
@@ -66,7 +89,19 @@ def rxn(rxn_id=None):
                       for product in reaction['enz_summary']['substrates']]
         rxn_img = generate_reaction(substrates, products)
         filter_apply = FILTER_APPLY.get(rxn_id, [])
+        if filter_apply:
+            filter_apply = {'input': filter_apply[0],
+                            'inputimg': generate_chem_inchi(filter_apply[0]),
+                            'ero': filter_apply[1],
+                            'eroimg': generate_ero(EROS.find_one({'_id': filter_apply[1]})['readable'].strip('{').strip('}').strip()),
+                            'forward': [(x, generate_chems_smiles(x)) for x in filter_apply[2]['forward'] if x],
+                            'reverse': [(x, generate_chems_smiles(x)) for x in filter_apply[2]['reverse'] if x],
+                            }
         filter_infer = FILTER_INFER.get(rxn_id, [])
+        for res in filter_infer:
+            if 'ERO' in res:
+                res['EROIMG'] = generate_ero(
+                    res['ERO'].strip('{').strip('}').strip())
     return render_template('rxn.html', reaction=reaction, substrates=substrates, products=products, rxn_img=rxn_img, filter_infer=filter_infer, filter_apply=filter_apply, report_reactions=REPORT_REACTIONS)
 
 
