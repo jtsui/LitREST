@@ -8,6 +8,7 @@ from pymongo import *
 import pprint
 import base64
 from collections import defaultdict
+import json
 
 INDIGO = Indigo()
 RENDERER = IndigoRenderer(INDIGO)
@@ -22,6 +23,7 @@ FILTER_APPLY = json.load(open('../data/apply_ero_pubmed.json'))
 REPORT_REACTIONS = json.load(open('../data/report_reactions.json'))
 REPORT_REACTIONS = [(x, y)
                     for x, y in REPORT_REACTIONS if isinstance(y, list) and x != 'Reactions matched']
+REPORT_REACTIONS_SET = dict([(x, set(y)) for x, y in REPORT_REACTIONS])
 REACTION_CATEGORIES = defaultdict(list)
 for category, reactions in REPORT_REACTIONS:
     for reaction in reactions:
@@ -109,9 +111,21 @@ def rxn(rxn_id=None):
                     res['ERO'].strip('{').strip('}').strip())
     return render_template('rxn.html', reaction=reaction, substrates=substrates, products=products, rxn_img=rxn_img, filter_infer=filter_infer, filter_apply=filter_apply, report_reactions=REPORT_REACTIONS, reaction_categories=REACTION_CATEGORIES)
 
+
+@app.route('/_getrxnids')
+def getrxnids():
+    checked = json.loads(request.args.get('checked', '', type=str))
+    all_rxn_ids = reduce(
+        lambda x, y: x.union(y), REPORT_REACTIONS_SET.values())
+    included = reduce(lambda x, y: x.union(y), [
+                      REPORT_REACTIONS_SET[x] for x in checked], set())
+    excluded = all_rxn_ids.difference(included)
+    return jsonify(included=sorted(list(included)), excluded=sorted(list(excluded)), included_length=len(included), excluded_length=len(excluded))
+
+
 @app.route('/rxnselect/')
 def rxnselect():
-    return render_template('rxnselect.html', report_reactions=REPORT_REACTIONS)    
+    return render_template('rxnselect.html', report_reactions=REPORT_REACTIONS_SET, rxn_ids=sorted(list(reduce(lambda x,y: x.union(y), REPORT_REACTIONS_SET.values()))))
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:

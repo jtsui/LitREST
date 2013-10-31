@@ -1,5 +1,24 @@
 <!DOCTYPE html>
 <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.css') }}" />
+<script type=text/javascript src="{{
+  url_for('static', filename='jquery-2.0.3.min.js') }}"></script>
+<script type=text/javascript>
+  $(function() {
+    $('.checkoptions').bind('click', function() {
+      $.ajax({
+          url: {{ request.script_root|tojson|safe }} + '/_getrxnids',
+          data: { checked: JSON.stringify($('.checkoptions').filter(function (idx, a) {return a.checked} ).map(function (idx, b) {return b.value}).get()) },
+          traditional: true,
+          success: function(data) {
+            $("#included").text(data.included);
+            $("#excluded").text(data.excluded);
+            $("#excluded_length").text(data.excluded_length);
+            $("#included_length").text(data.included_length);
+          }
+      });
+    });
+  });
+</script>
 
 <html>
 <body class="container">
@@ -11,12 +30,24 @@
 </div>
 
 <div class="well">
-  {% for rep in report_reactions %}
+  {% for rep, rxns in report_reactions.iteritems() %}
     <label class="checkbox">
-      <input type="checkbox" value="">
-      {{ rep[0] }}
+      <input class="checkoptions" type="checkbox" value="{{ rep }}">
+      {{ rep }}
     </label>
   {% endfor %}
+</div>
+
+<div class="well">
+  <h4>Included</h4>
+  <p id="included_length"></p>
+  <p id="included"></p>
+</div>
+
+<div class="well">
+  <h4>Excluded</h4>
+  <p id="excluded_length"></p>
+  <p id="excluded"></p>
 </div>
 
 </body>
