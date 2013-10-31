@@ -109,6 +109,9 @@ def rxn(rxn_id=None):
                     res['ERO'].strip('{').strip('}').strip())
     return render_template('rxn.html', reaction=reaction, substrates=substrates, products=products, rxn_img=rxn_img, filter_infer=filter_infer, filter_apply=filter_apply, report_reactions=REPORT_REACTIONS, reaction_categories=REACTION_CATEGORIES)
 
+@app.route('/rxnselect/')
+def rxnselect():
+    return render_template('rxnselect.html', report_reactions=REPORT_REACTIONS)    
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:

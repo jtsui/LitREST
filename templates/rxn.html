@@ -5,193 +5,211 @@
 <body class="container">
 
 <div class="hero-unit">
-  <h2>
+  <h3>
     Reaction Visualizer (on port 27334 w/ Litmining Reactions)
-  </h2>
+  </h3>
   <p>
     Instructions: To view a reaction go to /rxn/(rxn_id).
   </p>
 </div>
 
 {% if reaction %}
-<table border="1">
-<tr>
-  <td>ID</td>
-  <td>{{ reaction['_id']  }}</td>
-</tr>
-<tr>
-  <td>Description</td>
-  <td>{{ reaction['easy_desc']  }}</td>
-</tr>
-<tr>
-  <td>Ecnum</td>
-  <td>{{ reaction['ecnum']  }}</td>
-</tr>
-<tr>
-  <td>References</td>
-  <td>{{ reaction['references']  }}</td>
-</tr>
-<tr>
-  <td>Organisms</td>
-  <td>{{ reaction['organisms']  }}</td>
-</tr>
-<tr>
-  <td>Metadata</td>
-  <td>
-    {% for res in reaction['metadata'] %}
-    <table border="0">
+<div class="well">
+  <h4>Overview</h4>
+  <table class="table table-condensed table-hover table-bordered">
+  <tr>
+    <td>ID</td>
+    <td>{{ reaction['_id']  }}</td>
+  </tr>
+  <tr>
+    <td>Description</td>
+    <td>{{ reaction['easy_desc']  }}</td>
+  </tr>
+  <tr>
+    <td>Ecnum</td>
+    <td>{{ reaction['ecnum']  }}</td>
+  </tr>
+  <tr>
+    <td>References</td>
+    <td>{{ reaction['references']|join(', ')  }}</td>
+  </tr>
+  <tr>
+    <td>Organisms</td>
+    <td>{{ reaction['organisms']|join(', ')  }}</td>
+  </tr>
+  <tr>
+    <td>Metadata</td>
+    <td>
+      {% for res in reaction['metadata'] %}
+      <table border="0">
+        {% for k, v in res.iteritems() %}
+          <tr>
+            <td>{{ k }}</td>
+            <td>{{ v }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+      {% endfor %}
+    </td>
+  </tr>
+  <tr>
+    <td>Categories</td>
+    <td>
+      {{ reaction_categories[reaction['_id']]|join(', ') }}
+    </td>
+  </tr>
+  </table>
+  <tr>
+    <td><img src="{{ rxn_img }}"></td>
+  </tr>  
+</div>
+
+<div class="well">
+  <h4>Substrates</h4>
+  {% for chemical in substrates %}
+  <table class="table table-condensed table-hover table-bordered">
+    <tr>
+      <td>ID</td>
+      <td>{{ chemical['_id']  }}</td>
+    </tr>
+    <tr>
+      <td>canonical</td>
+      <td>{{ chemical['canonical']  }}</td>
+    </tr>
+    <tr>
+      <td>smiles</td>
+      <td>{{ chemical['SMILES']  }}</td>
+    </tr>
+    <tr>
+      <td>inchi</td>
+      <td>{{ chemical['InChI']  }}</td>
+    </tr>
+    <tr>
+      <td>names</td>
+      <td>{{ chemical['names']['synonyms']|join(', ')  }}</td>
+    </tr>
+  </table>
+  
+  {% endfor %}
+</div>
+
+<div class="well">
+<h4>Products</h4>
+  {% for chemical in products %}
+  <table class="table table-condensed table-hover table-bordered">
+    <tr>
+      <td>ID</td>
+      <td>{{ chemical['_id']  }}</td>
+    </tr>
+    <tr>
+      <td>canonical</td>
+      <td>{{ chemical['canonical']  }}</td>
+    </tr>
+    <tr>
+      <td>smiles</td>
+      <td>{{ chemical['SMILES']  }}</td>
+    </tr>
+    <tr>
+      <td>inchi</td>
+      <td>{{ chemical['InChI']  }}</td>
+    </tr>
+    <tr>
+      <td>names</td>
+      <td>{{ chemical['names']['synonyms']|join(', ')  }}</td>
+    </tr>
+  </table>
+  
+  {% endfor %}
+</div>
+
+<div class="well">
+  <h4>Results from Inferring ERO</h4>
+  {% if filter_infer %}
+    {% for res in filter_infer %}
+    <table class="table table-condensed table-hover table-bordered">
       {% for k, v in res.iteritems() %}
         <tr>
           <td>{{ k }}</td>
-          <td>{{ v }}</td>
+          <td>
+            {% if k == 'EROIMG' %}
+              <img src="{{ v }}">
+            {% else %}
+              {{ v }}
+            {% endif %}
+          </td>
         </tr>
       {% endfor %}
     </table>
-    <br>
     {% endfor %}
-  </td>
-</tr>
-<tr>
-  <td>Categories</td>
-  <td>
-    {{ reaction_categories[reaction['_id']]|join(', ') }}
-  </td>
-</tr>
-</table>
-<br>
-<img src="{{ rxn_img }}">
-<h3>Substrates</h3>
-{% for chemical in substrates %}
-<table border="1">
-  <tr>
-    <td>ID</td>
-    <td>{{ chemical['_id']  }}</td>
-  </tr>
-  <tr>
-    <td>canonical</td>
-    <td>{{ chemical['canonical']  }}</td>
-  </tr>
-  <tr>
-    <td>smiles</td>
-    <td>{{ chemical['SMILES']  }}</td>
-  </tr>
-  <tr>
-    <td>inchi</td>
-    <td>{{ chemical['InChI']  }}</td>
-  </tr>
-  <tr>
-    <td>names</td>
-    <td>{{ chemical['names']['synonyms']|join(', ')  }}</td>
-  </tr>
-</table>
-<br>
-{% endfor %}
-<h3>Products</h3>
-{% for chemical in products %}
-<table border="1">
-  <tr>
-    <td>ID</td>
-    <td>{{ chemical['_id']  }}</td>
-  </tr>
-  <tr>
-    <td>canonical</td>
-    <td>{{ chemical['canonical']  }}</td>
-  </tr>
-  <tr>
-    <td>smiles</td>
-    <td>{{ chemical['SMILES']  }}</td>
-  </tr>
-  <tr>
-    <td>inchi</td>
-    <td>{{ chemical['InChI']  }}</td>
-  </tr>
-  <tr>
-    <td>names</td>
-    <td>{{ chemical['names']['synonyms']|join(', ')  }}</td>
-  </tr>
-</table>
-<br>
-{% endfor %}
-<h3>Results from Inferring ERO</h3>
-{% for res in filter_infer %}
-<table border="1">
-  {% for k, v in res.iteritems() %}
-    <tr>
-      <td>{{ k }}</td>
-      <td>
-        {% if k == 'EROIMG' %}
-          <img src="{{ v }}">
-        {% else %}
-          {{ v }}
-        {% endif %}
-      </td>
-    </tr>
-  {% endfor %}
-</table>
-<br>
-{% endfor %}
-<h3>Results from Applying ERO</h3>
-{% if filter_apply %}
-  <table border="1">
-    <tr>
-      <td>Input Chemical</td>
-      <td>
-        <table border="0">
-          <tr><td><img src="{{ filter_apply['inputimg'] }}"></td></tr>
-          <tr><td>{{ filter_apply['input'] }}</td></tr>
-        </table>
-      </td>
-    </tr>
-    <tr>
-      <td>ERO</td>
-      <td>
-        <table border="0">
-          <tr><td><img src="{{ filter_apply['eroimg'] }}"></td></tr>
-          <tr><td>{{ filter_apply['ero'] }}</td></tr>
-        </table>
-      </td>
-    </tr>
-    <tr>
-      <td>Forward</td>
-      {% for forward in filter_apply['forward'] %}
+  {% else %}
+    None
+  {% endif %}
+</div>
+
+<div class="well">
+<h4>Results from Applying ERO</h4>
+  {% if filter_apply %}
+    <table class="table table-condensed table-hover table-bordered">
+      <tr>
+        <td>Input Chemical</td>
         <td>
           <table border="0">
-            <tr><td><img src="{{ forward[1] }}"></td></tr>
-            <tr><td>{{ forward[0] }}</td></tr>
+            <tr><td><img src="{{ filter_apply['inputimg'] }}"></td></tr>
+            <tr><td>{{ filter_apply['input'] }}</td></tr>
           </table>
         </td>
-      {% endfor %}
-    </tr>
-    <tr>
-      <td>Reverse</td>
-      {% for reverse in filter_apply['reverse'] %}
+      </tr>
+      <tr>
+        <td>ERO</td>
         <td>
           <table border="0">
-            <tr><td><img src="{{ reverse[1] }}"></td></tr>
-            <tr><td>{{ reverse[0] }}</td></tr>
+            <tr><td><img src="{{ filter_apply['eroimg'] }}"></td></tr>
+            <tr><td>{{ filter_apply['ero'] }}</td></tr>
           </table>
         </td>
-      {% endfor %}
-    </tr>
-  </table>
-  <br>
-{% else %}
-  None
-{% endif %}
+      </tr>
+      <tr>
+        <td>Forward</td>
+        {% for forward in filter_apply['forward'] %}
+          <td>
+            <table border="0">
+              <tr><td><img src="{{ forward[1] }}"></td></tr>
+              <tr><td>{{ forward[0] }}</td></tr>
+            </table>
+          </td>
+        {% endfor %}
+      </tr>
+      <tr>
+        <td>Reverse</td>
+        {% for reverse in filter_apply['reverse'] %}
+          <td>
+            <table border="0">
+              <tr><td><img src="{{ reverse[1] }}"></td></tr>
+              <tr><td>{{ reverse[0] }}</td></tr>
+            </table>
+          </td>
+        {% endfor %}
+      </tr>
+    </table>
+  {% else %}
+    None
+  {% endif %}
+</div>
 
 {% else %}
-<p>
-  Reaction not found.
-</p>
-<h3>Report Reactions</h3>
-<table border="1">
-{% for rep in report_reactions %}
-  <tr>
-    <td>{{ rep[0] }}</td>
-    <td>{{ rep[1] }}</td>
-  </tr>
-{% endfor %}
-</table>
+
+<div class="well">
+  <h4>Report Reactions</h4>
+  <table class="table table-condensed table-hover table-bordered">
+  {% for rep in report_reactions %}
+    <tr>
+      <td>{{ rep[0] }}</td>
+      <td>{{ rep[1]|join(', ') }}</td>
+    </tr>
+  {% endfor %}
+  </table>
+</div>
+
 {% endif %}
 
 </body>

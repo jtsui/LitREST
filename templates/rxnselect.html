@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.css') }}" />
+
+<html>
+<body class="container">
+
+<div class="hero-unit">
+  <h3>
+    Reaction Selector
+  </h3>
+</div>
+
+<div class="well">
+  {% for rep in report_reactions %}
+    <label class="checkbox">
+      <input type="checkbox" value="">
+      {{ rep[0] }}
+    </label>
+  {% endfor %}
+</div>
+
+</body>
+</html>
