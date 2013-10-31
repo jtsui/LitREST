@@ -1,14 +1,17 @@
 <!DOCTYPE html>
+<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='bootstrap/css/bootstrap.css') }}" />
+
 <html>
-<body>
+<body class="container">
 
-<h2>
-  Reaction Visualizer (on port 27334 w/ Litmining Reactions)
-</h2>
-
-<p>
-  Instructions: To view a reaction go to /rxn/(rxn_id).
-</p>
+<div class="hero-unit">
+  <h2>
+    Reaction Visualizer (on port 27334 w/ Litmining Reactions)
+  </h2>
+  <p>
+    Instructions: To view a reaction go to /rxn/(rxn_id).
+  </p>
+</div>
 
 {% if reaction %}
 <table border="1">
@@ -48,6 +51,12 @@
     {% endfor %}
   </td>
 </tr>
+<tr>
+  <td>Categories</td>
+  <td>
+    {{ reaction_categories[reaction['_id']]|join(', ') }}
+  </td>
+</tr>
 </table>
 <br>
 <img src="{{ rxn_img }}">
@@ -72,7 +81,7 @@
   </tr>
   <tr>
     <td>names</td>
-    <td>{{ chemical['names']['synonyms']  }}</td>
+    <td>{{ chemical['names']['synonyms']|join(', ')  }}</td>
   </tr>
 </table>
 <br>
@@ -98,7 +107,7 @@
   </tr>
   <tr>
     <td>names</td>
-    <td>{{ chemical['names']['synonyms']  }}</td>
+    <td>{{ chemical['names']['synonyms']|join(', ')  }}</td>
   </tr>
 </table>
 <br>

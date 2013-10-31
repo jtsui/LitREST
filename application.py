@@ -7,6 +7,7 @@ from indigo.indigo_inchi import *
 from pymongo import *
 import pprint
 import base64
+from collections import defaultdict
 
 INDIGO = Indigo()
 RENDERER = IndigoRenderer(INDIGO)
@@ -21,6 +22,10 @@ FILTER_APPLY = json.load(open('../data/apply_ero_pubmed.json'))
 REPORT_REACTIONS = json.load(open('../data/report_reactions.json'))
 REPORT_REACTIONS = [(x, y)
                     for x, y in REPORT_REACTIONS if isinstance(y, list) and x != 'Reactions matched']
+REACTION_CATEGORIES = defaultdict(list)
+for category, reactions in REPORT_REACTIONS:
+    for reaction in reactions:
+        REACTION_CATEGORIES[long(reaction)].append(category)
 pr = pprint.PrettyPrinter(indent=2)
 
 
@@ -102,7 +107,7 @@ def rxn(rxn_id=None):
             if 'ERO' in res:
                 res['EROIMG'] = generate_ero(
                     res['ERO'].strip('{').strip('}').strip())
-    return render_template('rxn.html', reaction=reaction, substrates=substrates, products=products, rxn_img=rxn_img, filter_infer=filter_infer, filter_apply=filter_apply, report_reactions=REPORT_REACTIONS)
+    return render_template('rxn.html', reaction=reaction, substrates=substrates, products=products, rxn_img=rxn_img, filter_infer=filter_infer, filter_apply=filter_apply, report_reactions=REPORT_REACTIONS, reaction_categories=REACTION_CATEGORIES)
 
 
 if __name__ == '__main__':
