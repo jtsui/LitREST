@@ -115,17 +115,18 @@ def rxn(rxn_id=None):
 @app.route('/_getrxnids')
 def getrxnids():
     checked = json.loads(request.args.get('checked', '', type=str))
-    all_rxn_ids = reduce(
-        lambda x, y: x.union(y), REPORT_REACTIONS_SET.values())
-    included = reduce(lambda x, y: x.union(y), [
-                      REPORT_REACTIONS_SET[x] for x in checked], set())
-    excluded = all_rxn_ids.difference(included)
-    return jsonify(included=sorted(list(included)), excluded=sorted(list(excluded)), included_length=len(included), excluded_length=len(excluded))
+    checked_sets = [REPORT_REACTIONS_SET[x] for x in checked]
+    all_rxn_ids = set.union(*REPORT_REACTIONS_SET.values())
+    included_union = set.union(*checked_sets)
+    excluded_union = all_rxn_ids.difference(included_union)
+    included_intersect = set.intersection(*checked_sets)
+    excluded_intersect = all_rxn_ids.difference(included_intersect)
+    return jsonify(included_union=sorted(list(included_union)), excluded_union=sorted(list(excluded_union)), included_intersect=sorted(list(included_intersect)), excluded_intersect=sorted(list(excluded_intersect)))
 
 
 @app.route('/rxnselect/')
 def rxnselect():
-    return render_template('rxnselect.html', report_reactions=REPORT_REACTIONS_SET, rxn_ids=sorted(list(reduce(lambda x,y: x.union(y), REPORT_REACTIONS_SET.values()))))
+    return render_template('rxnselect.html', categories=sorted(REPORT_REACTIONS_SET.keys()), rxn_ids=sorted(list(set.union(*REPORT_REACTIONS_SET.values()))))
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:

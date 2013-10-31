@@ -10,10 +10,14 @@
           data: { checked: JSON.stringify($('.checkoptions').filter(function (idx, a) {return a.checked} ).map(function (idx, b) {return b.value}).get()) },
           traditional: true,
           success: function(data) {
-            $("#included").text(data.included);
-            $("#excluded").text(data.excluded);
-            $("#excluded_length").text(data.excluded_length);
-            $("#included_length").text(data.included_length);
+            $("#included_union").text(data.included_union);
+            $("#excluded_union").text(data.excluded_union);
+            $("#excluded_union_length").text(data.excluded_union.length);
+            $("#included_union_length").text(data.included_union.length);
+            $("#included_intersect").text(data.included_intersect);
+            $("#excluded_intersect").text(data.excluded_intersect);
+            $("#excluded_intersect_length").text(data.excluded_intersect.length);
+            $("#included_intersect_length").text(data.included_intersect.length);
           }
       });
     });
@@ -30,24 +34,36 @@
 </div>
 
 <div class="well">
-  {% for rep, rxns in report_reactions.iteritems() %}
+  {% for category in categories %}
     <label class="checkbox">
-      <input class="checkoptions" type="checkbox" value="{{ rep }}">
-      {{ rep }}
+      <input class="checkoptions" type="checkbox" value="{{ category }}">
+      {{ category }}
     </label>
   {% endfor %}
 </div>
 
 <div class="well">
-  <h4>Included</h4>
-  <p id="included_length"></p>
-  <p id="included"></p>
+  <h4>Included Union</h4>
+  <p id="included_union_length"></p>
+  <p id="included_union"></p>
 </div>
 
 <div class="well">
-  <h4>Excluded</h4>
-  <p id="excluded_length"></p>
-  <p id="excluded"></p>
+  <h4>Excluded Union</h4>
+  <p id="excluded_union_length"></p>
+  <p id="excluded_union"></p>
+</div>
+
+<div class="well">
+  <h4>Included Intersect</h4>
+  <p id="included_intersect_length"></p>
+  <p id="included_intersect"></p>
+</div>
+
+<div class="well">
+  <h4>Excluded Intersect</h4>
+  <p id="excluded_intersect_length"></p>
+  <p id="excluded_intersect"></p>
 </div>
 
 </body>
