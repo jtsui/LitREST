@@ -167,7 +167,7 @@ def rxnselect():
 
 
 def main():
-    if len(sys.argv) == 2:
+    if len(sys.argv) == 4:
         the_file, myport, file_suffix, act_port = sys.argv
         initialize(act_port, file_suffix)
         app.run(host='0.0.0.0', port=int(myport))
