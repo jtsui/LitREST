@@ -9,6 +9,7 @@ import pprint
 import base64
 from collections import defaultdict
 import json
+import itertools
 
 INDIGO = Indigo()
 RENDERER = IndigoRenderer(INDIGO)
@@ -22,10 +23,13 @@ FILTER_INFER = json.load(open('../data/infer_ero_pubmed.json'))
 FILTER_APPLY = json.load(open('../data/apply_ero_pubmed.json'))
 REPORT_REACTIONS = json.load(open('../data/report_reactions.json'))
 REPORT_REACTIONS = [(x, y)
-                    for x, y in REPORT_REACTIONS if isinstance(y, list) and x != 'Reactions matched']
-REPORT_REACTIONS_SET = dict([(x, set(y)) for x, y in REPORT_REACTIONS])
+                    for x, y in REPORT_REACTIONS if isinstance(y, list)]
 REACTION_CATEGORIES = defaultdict(list)
+REPORT_REACTIONS_SET = {}
+all_rxn_ids = set.union(*[set(y) for x,y in REPORT_REACTIONS])
 for category, reactions in REPORT_REACTIONS:
+    REPORT_REACTIONS_SET[category] = set(reactions)
+    REPORT_REACTIONS_SET['^%s' % category] = all_rxn_ids.difference(REPORT_REACTIONS_SET[category])
     for reaction in reactions:
         REACTION_CATEGORIES[long(reaction)].append(category)
 pr = pprint.PrettyPrinter(indent=2)
@@ -115,17 +119,26 @@ def rxn(rxn_id=None):
 @app.route('/_getrxnids')
 def getrxnids():
     checked = json.loads(request.args.get('checked', '', type=str))
-    checked_sets = [REPORT_REACTIONS_SET[x] for x in checked]
-    all_rxn_ids = set.union(*REPORT_REACTIONS_SET.values())
-    included_union = set.union(*checked_sets)
-    excluded_union = all_rxn_ids.difference(included_union)
-    included_intersect = set.intersection(*checked_sets)
-    excluded_intersect = all_rxn_ids.difference(included_intersect)
-    return jsonify(included_union=sorted(list(included_union)), excluded_union=sorted(list(excluded_union)), included_intersect=sorted(list(included_intersect)), excluded_intersect=sorted(list(excluded_intersect)))
+    checked_sets = []
+    for x in checked:
+        checked_sets.append(((x, REPORT_REACTIONS_SET[x]), ('^%s' % x, REPORT_REACTIONS_SET['^%s' % x])))
+    result = {}
 
+    if len(checked_sets) == 1:
+        result[checked_sets[0][0][0]] = sorted(list(checked_sets[0][0][1]))
+        result[checked_sets[0][1][0]] = sorted(list(checked_sets[0][1][1]))
+    elif len(checked_sets) > 1:
+        for combination in itertools.product(*checked_sets):
+            names = [x for x,y in combination]
+            intersect = set.intersection(*[y for x, y in combination])
+            result[' && '.join(names)] = sorted(list(intersect))
+    return render_template('rxnresults.html', result=result)
 
 @app.route('/rxnselect/')
 def rxnselect():
+    # venn diagram library
+    # http://christophermullins.net/page/jquery-venn
+    # https://github.com/sidoh/venn
     return render_template('rxnselect.html', categories=sorted(REPORT_REACTIONS_SET.keys()), rxn_ids=sorted(list(set.union(*REPORT_REACTIONS_SET.values()))))
 
 if __name__ == '__main__':

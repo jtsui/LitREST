@@ -1,0 +1,17 @@
+<link type="text/css" rel="stylesheet" href="{{ url_for('static',filename='bootstrap/css/bootstrap.css') }}" />
+
+<html>
+
+{% for name, rxn_set in result.iteritems() %}
+<div class="well well-sm">
+  <h4>{{ name }} - {{ rxn_set|length }}</h4>
+
+  <div style="height:100px;overflow:auto;">
+  	{% for rxn_id in rxn_set %}
+  	  <a href="/rxn/{{ rxn_id }}">{{ rxn_id }}</a>
+    {% endfor %}
+  </div>
+</div>
+{% endfor %}
+
+</html>
