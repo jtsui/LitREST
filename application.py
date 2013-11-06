@@ -14,11 +14,8 @@ import itertools
 INDIGO = Indigo()
 RENDERER = IndigoRenderer(INDIGO)
 INDIGO_INCHI = IndigoInchi(INDIGO)
-DB = Connection('pathway.berkeley.edu', 27334)
-CHEMICALS = DB.actv01['chemicals']
-REACTIONS = DB.actv01['actfamilies']
-DB_EROS = Connection('pathway.berkeley.edu', 27017)
-EROS = DB_EROS.actv01['eros']
+DB_EROS, EROS, DB, CHEMICALS, REACTIONS, FILTER_INFER, FILTER_APPLY, REPORT_REACTIONS, REACTION_CATEGORIES, REPORT_REACTIONS_SET = None, None, None, None, None, None, None, None, None, None
+# these are for development. call initialize() for production data
 FILTER_INFER = json.load(open('../data/infer_ero_pubmed.json'))
 FILTER_APPLY = json.load(open('../data/apply_ero_pubmed.json'))
 REPORT_REACTIONS = json.load(open('../data/report_reactions.json'))
@@ -26,13 +23,38 @@ REPORT_REACTIONS = [(x, y)
                     for x, y in REPORT_REACTIONS if isinstance(y, list)]
 REACTION_CATEGORIES = defaultdict(list)
 REPORT_REACTIONS_SET = {}
-all_rxn_ids = set.union(*[set(y) for x,y in REPORT_REACTIONS])
+all_rxn_ids = set.union(*[set(y) for x, y in REPORT_REACTIONS])
 for category, reactions in REPORT_REACTIONS:
     REPORT_REACTIONS_SET[category] = set(reactions)
-    REPORT_REACTIONS_SET['^%s' % category] = all_rxn_ids.difference(REPORT_REACTIONS_SET[category])
+    REPORT_REACTIONS_SET['^%s' % category] = all_rxn_ids.difference(
+        REPORT_REACTIONS_SET[category])
     for reaction in reactions:
         REACTION_CATEGORIES[long(reaction)].append(category)
 pr = pprint.PrettyPrinter(indent=2)
+
+
+def initialize(port, suffix):
+    global DB_EROS, EROS, DB, CHEMICALS, REACTIONS, FILTER_INFER, FILTER_APPLY, REPORT_REACTIONS, REACTION_CATEGORIES, REPORT_REACTIONS_SET
+    DB_EROS = Connection('pathway.berkeley.edu', 27017)
+    EROS = DB_EROS.actv01['eros']
+    DB = Connection('pathway.berkeley.edu', port)
+    CHEMICALS = DB.actv01['chemicals']
+    REACTIONS = DB.actv01['actfamilies']
+    FILTER_INFER = json.load(open('../data/infer_ero_pubmed_%s.json' % suffix))
+    FILTER_APPLY = json.load(open('../data/apply_ero_pubmed_%s.json' % suffix))
+    REPORT_REACTIONS = json.load(
+        open('../data/report_reactions_%s.json' % suffix))
+    REPORT_REACTIONS = [(x, y)
+                        for x, y in REPORT_REACTIONS if isinstance(y, list)]
+    REACTION_CATEGORIES = defaultdict(list)
+    REPORT_REACTIONS_SET = {}
+    all_rxn_ids = set.union(*[set(y) for x, y in REPORT_REACTIONS])
+    for category, reactions in REPORT_REACTIONS:
+        REPORT_REACTIONS_SET[category] = set(reactions)
+        REPORT_REACTIONS_SET['^%s' % category] = all_rxn_ids.difference(
+            REPORT_REACTIONS_SET[category])
+        for reaction in reactions:
+            REACTION_CATEGORIES[long(reaction)].append(category)
 
 
 def generate_reaction(substrates, products, width=1000, height=300):
@@ -121,7 +143,8 @@ def getrxnids():
     checked = json.loads(request.args.get('checked', '', type=str))
     checked_sets = []
     for x in checked:
-        checked_sets.append(((x, REPORT_REACTIONS_SET[x]), ('^%s' % x, REPORT_REACTIONS_SET['^%s' % x])))
+        checked_sets.append(
+            ((x, REPORT_REACTIONS_SET[x]), ('^%s' % x, REPORT_REACTIONS_SET['^%s' % x])))
     result = {}
 
     if len(checked_sets) == 1:
@@ -129,10 +152,11 @@ def getrxnids():
         result[checked_sets[0][1][0]] = sorted(list(checked_sets[0][1][1]))
     elif len(checked_sets) > 1:
         for combination in itertools.product(*checked_sets):
-            names = [x for x,y in combination]
+            names = [x for x, y in combination]
             intersect = set.intersection(*[y for x, y in combination])
             result[' && '.join(names)] = sorted(list(intersect))
     return render_template('rxnresults.html', result=result)
+
 
 @app.route('/rxnselect/')
 def rxnselect():
@@ -141,9 +165,17 @@ def rxnselect():
     # https://github.com/sidoh/venn
     return render_template('rxnselect.html', categories=sorted(REPORT_REACTIONS_SET.keys()), rxn_ids=sorted(list(set.union(*REPORT_REACTIONS_SET.values()))))
 
-if __name__ == '__main__':
+
+def main():
     if len(sys.argv) == 2:
-        the_file, myport = sys.argv
+        the_file, myport, file_suffix, act_port = sys.argv
+        initialize(act_port, file_suffix)
         app.run(host='0.0.0.0', port=int(myport))
-    else:
+    elif len(sys.argv) == 1:
         app.run(debug=True)  # debug=True will run with reloader enabled
+    else:
+        print 'Wrong number of arguments. Usage: python application.py [port] [file suffix] [db port]\nExample: python application.py 27330 Journals10000 27334'
+        return
+
+if __name__ == '__main__':
+    main()
