@@ -146,35 +146,32 @@ def getrxnids():
         checked_sets.append(
             ((x, REPORT_REACTIONS_SET[x]), ('^%s' % x, REPORT_REACTIONS_SET['^%s' % x])))
     result = {}
-
     if len(checked_sets) == 1:
         result[checked_sets[0][0][0]] = sorted(list(checked_sets[0][0][1]))
         result[checked_sets[0][1][0]] = sorted(list(checked_sets[0][1][1]))
     elif len(checked_sets) > 1:
         for combination in itertools.product(*checked_sets):
-            names = [x for x, y in combination]
+            names = [x for x, y in combination if not x.startswith('^')]
+            names = ' AND '.join(names) or 'Other'
             intersect = set.intersection(*[y for x, y in combination])
-            result[' && '.join(names)] = sorted(list(intersect))
-    return render_template('rxnresults.html', result=result)
+            result[names] = sorted(list(intersect))
+    return render_template('rxnresults.html', result=result, keys=json.dumps(checked), resultjson=json.dumps(result))
 
 
 @app.route('/rxnselect/')
 def rxnselect():
-    # venn diagram library
-    # http://christophermullins.net/page/jquery-venn
-    # https://github.com/sidoh/venn
     return render_template('rxnselect.html', categories=sorted(REPORT_REACTIONS_SET.keys()), rxn_ids=sorted(list(set.union(*REPORT_REACTIONS_SET.values()))))
 
 
 def main():
     if len(sys.argv) == 4:
         the_file, myport, file_suffix, act_port = sys.argv
-        initialize(act_port, file_suffix)
+        initialize(int(act_port), file_suffix)
         app.run(host='0.0.0.0', port=int(myport))
     elif len(sys.argv) == 1:
         app.run(debug=True)  # debug=True will run with reloader enabled
     else:
-        print 'Wrong number of arguments. Usage: python application.py [port] [file suffix] [db port]\nExample: python application.py 27330 Journals10000 27334'
+        print 'Wrong number of arguments. Usage: python application.py [port] [file suffix] [db port]\nExample: python application.py 27330 Journal100000 27334'
         return
 
 if __name__ == '__main__':

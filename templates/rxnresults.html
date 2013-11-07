@@ -1,17 +1,59 @@
-<link type="text/css" rel="stylesheet" href="{{ url_for('static',filename='bootstrap/css/bootstrap.css') }}" />
+<script>
+  $(function() {
+    var categories = {{ keys|safe }};
+    var numsets = categories.length;
+    if (numsets < 2 || numsets > 4) {
+      $('#venn-well').hide();
+      return;
+    }
+    $('#venn-well').show();
+    $('#venn-demo').venn({ numSets: numsets, setLabels: categories, universeLabel: 'Other' });
+    $('#venn-demo').on('regionClicked.venn', function() {
+      $('#result-title').html('');
+      $('#region-list').html('');
+      $('#result-title').hide();
+      $('#region-list').hide();
+      var activeRegions = $('#venn-demo').venn('activeRegions');
+      arNames = [];
+      for ( var i in activeRegions ) {
+        console.log(activeRegions[i].getId());
+        arNames.push( activeRegions[i].getId() == "" ? "Other" : activeRegions[i].getId());
+      }
+      if (arNames.length == 0) {
+        return;
+      }
+      console.log(arNames);
+      var selection = arNames.join(', ');
+      var res = {{ resultjson|safe }};
+      var selection_set = [];
+      for (var i in arNames) {
+        selection_set.push.apply(selection_set, res[arNames[i]]);
+      }
+      $('#result-title').html(selection+' - ' +selection_set.length);
+      for ( var i in selection_set ) {
+        rxn_id = selection_set[i];
+        $('#region-list').append('<a href="/rxn/' + rxn_id + '">' + rxn_id + '</a>&nbsp;');
+      }
+      $('#result-title').show();
+      $('#region-list').show();
+    });
+  });
+ </script>
 
-<html>
+<div class="well well-sm" id="venn-well">
+  <h4>Venn</h4>
+  <div id="venn-demo" style="height:500px;"></div>
+  <h4 id="result-title"></h4>
+  <div id="region-list" style="height:100px;overflow:auto;"></div>
+</div>
 
 {% for name, rxn_set in result.iteritems() %}
 <div class="well well-sm">
   <h4>{{ name }} - {{ rxn_set|length }}</h4>
-
   <div style="height:100px;overflow:auto;">
-  	{% for rxn_id in rxn_set %}
-  	  <a href="/rxn/{{ rxn_id }}">{{ rxn_id }}</a>
+    {% for rxn_id in rxn_set %}
+      <a href="/rxn/{{ rxn_id }}">{{ rxn_id }}</a>
     {% endfor %}
   </div>
 </div>
 {% endfor %}
-
-</html>
