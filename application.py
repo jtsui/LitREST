@@ -35,7 +35,7 @@ pr = pprint.PrettyPrinter(indent=2)
 
 def initialize(port, suffix):
     global DB_EROS, EROS, DB, CHEMICALS, REACTIONS, FILTER_INFER, FILTER_APPLY, REPORT_REACTIONS, REACTION_CATEGORIES, REPORT_REACTIONS_SET
-    DB_EROS = Connection('pathway.berkeley.edu', 27017)
+    DB_EROS = Connection('pathway.berkeley.edu', 30000)
     EROS = DB_EROS.actv01['eros']
     DB = Connection('pathway.berkeley.edu', port)
     CHEMICALS = DB.actv01['chemicals']
