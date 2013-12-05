@@ -10,14 +10,17 @@ import base64
 from collections import defaultdict
 import json
 import itertools
+import os
 
 INDIGO = Indigo()
 RENDERER = IndigoRenderer(INDIGO)
 INDIGO_INCHI = IndigoInchi(INDIGO)
 DB_EROS, EROS, DB, CHEMICALS, REACTIONS, FILTER_INFER, FILTER_APPLY, REPORT_REACTIONS, REACTION_CATEGORIES, REPORT_REACTIONS_SET = None, None, None, None, None, None, None, None, None, None
 # these are for development. call initialize() for production data
-FILTER_INFER = json.load(open('../data/infer_ero_pubmed.json'))
-FILTER_APPLY = json.load(open('../data/apply_ero_pubmed.json'))
+FILTER_INFER = json.load(open('../data/infer_ero_pubmed.json')) if os.path.exists(
+    '../data/infer_ero_pubmed.json') else None
+FILTER_APPLY = json.load(open('../data/apply_ero_pubmed.json')) if os.path.exists(
+    '../data/apply_ero_pubmed.json') else None
 REPORT_REACTIONS = json.load(open('../data/report_reactions.json'))
 REPORT_REACTIONS = [(x, y)
                     for x, y in REPORT_REACTIONS if isinstance(y, list)]
@@ -31,6 +34,13 @@ for category, reactions in REPORT_REACTIONS:
     for reaction in reactions:
         REACTION_CATEGORIES[long(reaction)].append(category)
 pr = pprint.PrettyPrinter(indent=2)
+
+
+def load_molecule(smiles_or_inchi):
+    if smiles_or_inchi.startswith('InChI='):
+        return INDIGO_INCHI.loadMolecule(smiles_or_inchi)
+    else:
+        return INDIGO.loadMolecule(smiles_or_inchi)
 
 
 def initialize(port, suffix):
@@ -85,7 +95,7 @@ def generate_ero(query_reaction, width=600, height=200):
 
 
 def generate_chem_inchi(inchi, width=150, height=150):
-    chem = INDIGO_INCHI.loadMolecule(inchi)
+    chem = load_molecule(inchi)
     INDIGO.setOption('render-output-format', 'png')
     INDIGO.setOption('render-image-size', width, height)
     INDIGO.setOption('render-comment', '')
@@ -124,7 +134,7 @@ def rxn(rxn_id=None):
         filter_apply = FILTER_APPLY.get(rxn_id, [])
         if filter_apply:
             filter_apply = {'input': filter_apply[0],
-                            'inputimg': generate_chem_inchi(filter_apply[0]),
+                            'inputimg': generate_chems_smiles(filter_apply[0]),
                             'ero': filter_apply[1],
                             'eroimg': generate_ero(EROS.find_one({'_id': filter_apply[1]})['readable'].strip('{').strip('}').strip()),
                             'forward': [(x, generate_chems_smiles(x)) for x in filter_apply[2]['forward'] if x],
