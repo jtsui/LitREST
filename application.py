@@ -50,10 +50,12 @@ def initialize(port, suffix):
     DB = Connection('pathway.berkeley.edu', port)
     CHEMICALS = DB.actv01['chemicals']
     REACTIONS = DB.actv01['actfamilies']
-    FILTER_INFER = json.load(open('../data/infer_ero_pubmed_%s.json' % suffix))
-    FILTER_APPLY = json.load(open('../data/apply_ero_pubmed_%s.json' % suffix))
+    FILTER_INFER = json.load(
+        open('../data/filter_infer_results_%s.json' % suffix))
+    FILTER_APPLY = json.load(
+        open('../data/filter_apply_results_%s.json' % suffix))
     REPORT_REACTIONS = json.load(
-        open('../data/report_reactions_%s.json' % suffix))
+        open('../data/filter_report_%s.json' % suffix))
     REPORT_REACTIONS = [(x, y)
                         for x, y in REPORT_REACTIONS if isinstance(y, list)]
     REACTION_CATEGORIES = defaultdict(list)
