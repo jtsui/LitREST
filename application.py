@@ -139,8 +139,7 @@ def rxn(rxn_id=None):
                             'inputimg': generate_chems_smiles(filter_apply[0]),
                             'ero': filter_apply[1],
                             'eroimg': generate_ero(EROS.find_one({'_id': filter_apply[1]})['readable'].strip('{').strip('}').strip()),
-                            'forward': [(x, generate_chems_smiles(x)) for x in filter_apply[2]['forward'] if x],
-                            'reverse': [(x, generate_chems_smiles(x)) for x in filter_apply[2]['reverse'] if x],
+                            'result': [(x, generate_chems_smiles(x)) for x in filter_apply[2] if x],
                             }
         filter_infer = FILTER_INFER.get(rxn_id, [])
         for res in filter_infer:

@@ -151,7 +151,7 @@
   {% if filter_apply %}
     <table class="table table-condensed table-hover table-bordered">
       <tr>
-        <td>Input Chemical</td>
+        <td>Input</td>
         <td>
           <table border="0">
             <tr><td><img src="{{ filter_apply['inputimg'] }}"></td></tr>
@@ -169,23 +169,12 @@
         </td>
       </tr>
       <tr>
-        <td>Forward</td>
-        {% for forward in filter_apply['forward'] %}
+        <td>Result</td>
+        {% for res in filter_apply['result'] %}
           <td>
             <table border="0">
-              <tr><td><img src="{{ forward[1] }}"></td></tr>
-              <tr><td>{{ forward[0] }}</td></tr>
-            </table>
-          </td>
-        {% endfor %}
-      </tr>
-      <tr>
-        <td>Reverse</td>
-        {% for reverse in filter_apply['reverse'] %}
-          <td>
-            <table border="0">
-              <tr><td><img src="{{ reverse[1] }}"></td></tr>
-              <tr><td>{{ reverse[0] }}</td></tr>
+              <tr><td><img src="{{ res[1] }}"></td></tr>
+              <tr><td>{{ res[0] }}</td></tr>
             </table>
           </td>
         {% endfor %}
