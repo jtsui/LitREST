@@ -1,39 +1,28 @@
-from flask import *
-app = Flask(__name__)
 import sys
-from indigo.indigo import *
-from indigo.indigo_renderer import *
-from indigo.indigo_inchi import *
-from pymongo import *
-import pprint
 import base64
-from collections import defaultdict
-import json
 import itertools
-import os
+from utils import *
+from flask import *
+from pymongo import *
+from indigo.indigo import *
+from indigo.indigo_inchi import *
+from collections import defaultdict
+from indigo.indigo_renderer import *
+try:
+    import ujson as json
+except ImportError:
+    import json
 
+
+app = Flask(__name__)
 INDIGO = Indigo()
 RENDERER = IndigoRenderer(INDIGO)
 INDIGO_INCHI = IndigoInchi(INDIGO)
-DB_EROS, EROS, DB, CHEMICALS, REACTIONS, FILTER_INFER, FILTER_APPLY, REPORT_REACTIONS, REACTION_CATEGORIES, REPORT_REACTIONS_SET = None, None, None, None, None, None, None, None, None, None
-# these are for development. call initialize() for production data
-FILTER_INFER = json.load(open('../data/infer_ero_pubmed.json')) if os.path.exists(
-    '../data/infer_ero_pubmed.json') else None
-FILTER_APPLY = json.load(open('../data/apply_ero_pubmed.json')) if os.path.exists(
-    '../data/apply_ero_pubmed.json') else None
-REPORT_REACTIONS = json.load(open('../data/report_reactions.json'))
-REPORT_REACTIONS = [(x, y)
-                    for x, y in REPORT_REACTIONS if isinstance(y, list)]
-REACTION_CATEGORIES = defaultdict(list)
-REPORT_REACTIONS_SET = {}
-all_rxn_ids = set.union(*[set(y) for x, y in REPORT_REACTIONS])
-for category, reactions in REPORT_REACTIONS:
-    REPORT_REACTIONS_SET[category] = set(reactions)
-    REPORT_REACTIONS_SET['^%s' % category] = all_rxn_ids.difference(
-        REPORT_REACTIONS_SET[category])
-    for reaction in reactions:
-        REACTION_CATEGORIES[long(reaction)].append(category)
-pr = pprint.PrettyPrinter(indent=2)
+ERO_DB, DB, CHEM_DB, REACTION_DB = None, None, None, None
+FILTER_INFER, FILTER_APPLY = None, None
+REPORT_REACTIONS, REACTION_CATEGORIES, REPORT_REACTIONS_SET = None, None, None
+HOST = 'pathway.berkeley.edu'
+PORT = -1
 
 
 def load_molecule(smiles_or_inchi):
@@ -43,17 +32,39 @@ def load_molecule(smiles_or_inchi):
         return INDIGO.loadMolecule(smiles_or_inchi)
 
 
+def get_db():
+    global DB
+    if DB is None:
+        DB = Connection(HOST, PORT)
+    return DB
+
+
+def get_ero_db():
+    global ERO_DB
+    if ERO_DB is None:
+        EROS_DB = get_db().actv01['eros']
+    return EROS_DB
+
+
+def get_chem_db():
+    global CHEM_DB
+    if CHEM_DB is None:
+        CHEM_DB = get_db().actv01['chemicals']
+    return CHEM_DB
+
+
+def get_reaction_db():
+    global REACTION_DB
+    if REACTION_DB is None:
+        REACTION_DB = get_db().actv01['actfamilies']
+    return REACTION_DB
+
+
 def initialize(port, suffix):
-    global DB_EROS, EROS, DB, CHEMICALS, REACTIONS, FILTER_INFER, FILTER_APPLY, REPORT_REACTIONS, REACTION_CATEGORIES, REPORT_REACTIONS_SET
-    DB_EROS = Connection('pathway.berkeley.edu', 30000)
-    EROS = DB_EROS.actv01['eros']
-    DB = Connection('pathway.berkeley.edu', port)
-    CHEMICALS = DB.actv01['chemicals']
-    REACTIONS = DB.actv01['actfamilies']
-    FILTER_INFER = json.load(
-        open('../data/filter_infer_results_%s.json' % suffix))
-    FILTER_APPLY = json.load(
-        open('../data/filter_apply_results_%s.json' % suffix))
+    global PORT, FILTER_INFER, FILTER_APPLY, REPORT_REACTIONS, REACTION_CATEGORIES, REPORT_REACTIONS_SET
+    PORT = port
+    FILTER_INFER = json.load(open('../data/filter_infer_%s.json' % suffix))
+    FILTER_APPLY = json.load(open('../data/filter_apply_%s.json' % suffix))
     REPORT_REACTIONS = json.load(
         open('../data/filter_report_%s.json' % suffix))
     REPORT_REACTIONS = [(x, y)
@@ -126,11 +137,11 @@ def root():
 def rxn(rxn_id=None):
     reaction, substrates, products, rxn_img, filter_apply, filter_infer = None, None, None, None, None, None
     if rxn_id:
-        reaction = REACTIONS.find_one({'_id': long(rxn_id)})
+        reaction = get_reaction_db().find_one({'_id': long(rxn_id)})
     if reaction:
-        products = [CHEMICALS.find_one(product['pubchem'])
+        products = [get_chem_db().find_one(product['pubchem'])
                     for product in reaction['enz_summary']['products']]
-        substrates = [CHEMICALS.find_one(product['pubchem'])
+        substrates = [get_chem_db().find_one(product['pubchem'])
                       for product in reaction['enz_summary']['substrates']]
         rxn_img = generate_reaction(substrates, products)
         filter_apply = FILTER_APPLY.get(rxn_id, [])
@@ -179,11 +190,12 @@ def main():
         the_file, myport, file_suffix, act_port = sys.argv
         initialize(int(act_port), file_suffix)
         app.run(host='0.0.0.0', port=int(myport))
+        return
     elif len(sys.argv) == 1:
         app.run(debug=True)  # debug=True will run with reloader enabled
-    else:
-        print 'Wrong number of arguments. Usage: python application.py [port] [file suffix] [db port]\nExample: python application.py 27330 Journal100000 27334'
         return
+    print 'Wrong number of arguments. Usage: python application.py [port] [file suffix] [db port]'
+    print 'Example: python application.py 27330 brenda 27334'
 
 if __name__ == '__main__':
     main()
