@@ -8,9 +8,8 @@
   <h3>
     Reaction Visualizer
   </h3>
-  <p>
-    Instructions: To view a reaction go to /rxn/(rxn_id).
-  </p>
+  <p>Port 27330 has BRENDA reactions. Port 27331 has Journal reactions.</p>
+  <p>Instructions: To view a reaction go to /rxn/(rxn_id).</p>
 </div>
 
 {% if reaction %}
@@ -38,21 +37,6 @@
     <td>{{ reaction['organisms']|join(', ')  }}</td>
   </tr>
   <tr>
-    <td>Metadata</td>
-    <td>
-      {% for res in reaction['metadata'] %}
-      <table border="0">
-        {% for k, v in res.iteritems() %}
-          <tr>
-            <td>{{ k }}</td>
-            <td>{{ v }}</td>
-          </tr>
-        {% endfor %}
-      </table>
-      {% endfor %}
-    </td>
-  </tr>
-  <tr>
     <td>Categories</td>
     <td>
       {{ reaction_categories[reaction['_id']]|join(', ') }}
@@ -63,7 +47,26 @@
     <td><img src="{{ rxn_img }}"></td>
   </tr>  
 </div>
-
+<div class="well">
+  <h4>Overview</h4>
+  <table class="table table-condensed table-hover table-bordered">
+    <tr>
+      <td>Metadata</td>
+      <td>
+        {% for res in reaction['metadata'] %}
+        <table border="0">
+          {% for k, v in res.iteritems() %}
+            <tr>
+              <td>{{ k }}</td>
+              <td>{{ v }}</td>
+            </tr>
+          {% endfor %}
+        </table>
+        {% endfor %}
+      </td>
+    </tr>
+  </table>
+</div>  
 <div class="well">
   <h4>Substrates</h4>
   {% for chemical in substrates %}
@@ -87,6 +90,10 @@
     <tr>
       <td>names</td>
       <td>{{ chemical['names']['synonyms']|join(', ')  }}</td>
+    </tr>
+    <tr>
+      <td>structure</td>
+      <td>{{ chemical['img']  }}</td>
     </tr>
   </table>
   
@@ -116,6 +123,10 @@
     <tr>
       <td>names</td>
       <td>{{ chemical['names']['synonyms']|join(', ')  }}</td>
+    </tr>
+    <tr>
+      <td>structure</td>
+      <td>{{ chemical['img']  }}</td>
     </tr>
   </table>
   

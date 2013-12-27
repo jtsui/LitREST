@@ -141,8 +141,12 @@ def rxn(rxn_id=None):
     if reaction:
         products = [get_chem_db().find_one(product['pubchem'])
                     for product in reaction['enz_summary']['products']]
+        for product in products:
+            product.update({'img': generate_chem_inchi(product['InChI'])})
         substrates = [get_chem_db().find_one(product['pubchem'])
                       for product in reaction['enz_summary']['substrates']]
+        for substrate in substrates:
+            product.update({'img': generate_chem_inchi(substrate['InChI'])})
         rxn_img = generate_reaction(substrates, products)
         filter_apply = FILTER_APPLY.get(rxn_id, [])
         if filter_apply:
