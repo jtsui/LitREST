@@ -1,6 +1,7 @@
 import sys
 import base64
 import itertools
+import parse_utils
 from utils import *
 from flask import *
 from pymongo import *
@@ -92,8 +93,8 @@ def generate_reaction(substrates, products, width=1000, height=300):
         rxn.addProduct(p)
     INDIGO.setOption('render-output-format', 'png')
     INDIGO.setOption('render-image-size', width, height)
-    INDIGO.setOption('render-comment', '%s -> %s' %
-                     ([x['_id'] for x in substrates], [x['_id'] for x in products]))
+    INDIGO.setOption('render-comment', '%s --> %s' %
+                     (' + '.join([str(x['_id']) for x in substrates]), ' + '.join([str(x['_id']) for x in products])))
     t = RENDERER.renderToBuffer(rxn)
     return 'data:image/png;base64,%s' % base64.b64encode(t)
 
@@ -138,15 +139,19 @@ def rxn(rxn_id=None):
     reaction, substrates, products, rxn_img, filter_apply, filter_infer = None, None, None, None, None, None
     if rxn_id:
         reaction = get_reaction_db().find_one({'_id': long(rxn_id)})
+        for data in reaction['metadata']:
+            data['sentence'] = parse_utils.get_sentence(data['sid'])
     if reaction:
         products = [get_chem_db().find_one(product['pubchem'])
                     for product in reaction['enz_summary']['products']]
         for product in products:
-            product.update({'img': generate_chem_inchi(product['InChI'])})
+            product.update(
+                {'img': generate_chem_inchi(product['InChI'], 250, 250)})
         substrates = [get_chem_db().find_one(product['pubchem'])
                       for product in reaction['enz_summary']['substrates']]
         for substrate in substrates:
-            product.update({'img': generate_chem_inchi(substrate['InChI'])})
+            substrate.update(
+                {'img': generate_chem_inchi(substrate['InChI'], 250, 250)})
         rxn_img = generate_reaction(substrates, products)
         filter_apply = FILTER_APPLY.get(rxn_id, [])
         if filter_apply:
@@ -193,7 +198,7 @@ def main():
     if len(sys.argv) == 4:
         the_file, myport, file_suffix, act_port = sys.argv
         initialize(int(act_port), file_suffix)
-        app.run(host='0.0.0.0', port=int(myport))
+        app.run(host='0.0.0.0', port=int(myport), debug=True)
         return
     elif len(sys.argv) == 1:
         app.run(debug=True)  # debug=True will run with reloader enabled

@@ -225,8 +225,8 @@ def shake(tree, fruit):
 def get_sentence(sid):
     pmid, index = sid.split('-')
     paper = get_pubmed().find_one({'MedlineCitation.PMID': pmid})
-    abstract = parse_utils.cleanAbstract(paper)
-    sentences = parse_utils.splitSentences(abstract)
+    abstract = cleanAbstract(paper)
+    sentences = splitSentences(abstract)
     return sentences[index]
 
 

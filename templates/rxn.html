@@ -15,6 +15,10 @@
 {% if reaction %}
 <div class="well">
   <h4>Overview</h4>
+  <tr>
+    <td><img src="{{ rxn_img }}"></td>
+  </tr>  
+  <br><br>
   <table class="table table-condensed table-hover table-bordered">
   <tr>
     <td>ID</td>
@@ -25,7 +29,7 @@
     <td>{{ reaction['easy_desc']  }}</td>
   </tr>
   <tr>
-    <td>Ecnum</td>
+    <td>EC Number</td>
     <td>{{ reaction['ecnum']  }}</td>
   </tr>
   <tr>
@@ -43,30 +47,22 @@
     </td>
   </tr>
   </table>
-  <tr>
-    <td><img src="{{ rxn_img }}"></td>
-  </tr>  
 </div>
+
 <div class="well">
-  <h4>Overview</h4>
+  <h4>Literature Sources</h4>
+  {% for res in reaction['metadata'] %}
   <table class="table table-condensed table-hover table-bordered">
-    <tr>
-      <td>Metadata</td>
-      <td>
-        {% for res in reaction['metadata'] %}
-        <table border="0">
-          {% for k, v in res.iteritems() %}
-            <tr>
-              <td>{{ k }}</td>
-              <td>{{ v }}</td>
-            </tr>
-          {% endfor %}
-        </table>
-        {% endfor %}
-      </td>
-    </tr>
+    {% for k, v in res.iteritems() %}
+      <tr>
+        <td>{{ k }}</td>
+        <td>{{ v }}</td>
+      </tr>
+    {% endfor %}
   </table>
+  {% endfor %}
 </div>  
+
 <div class="well">
   <h4>Substrates</h4>
   {% for chemical in substrates %}
@@ -93,7 +89,7 @@
     </tr>
     <tr>
       <td>structure</td>
-      <td>{{ chemical['img']  }}</td>
+      <td><img src="{{ chemical['img']  }}"></td>
     </tr>
   </table>
   
@@ -126,7 +122,7 @@
     </tr>
     <tr>
       <td>structure</td>
-      <td>{{ chemical['img']  }}</td>
+      <td><img src="{{ chemical['img']  }}"></td>
     </tr>
   </table>
   
