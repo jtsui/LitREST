@@ -148,18 +148,17 @@ def rxn(rxn_id=None):
                 sentence = (' %s ' % sentence).replace(
                     ' %s ' % chem, ' <font color="blue">%s</font> ' % chem)
             data['sentence'] = sentence.strip()
-            print data
     if reaction:
         products = [get_chem_db().find_one(product['pubchem'])
                     for product in reaction['enz_summary']['products']]
         for product in products:
             product.update(
-                {'img': generate_chem_inchi(product['InChI'], 300, 150)})
+                {'img': generate_chem_inchi(product['InChI'], 500, 150)})
         substrates = [get_chem_db().find_one(product['pubchem'])
                       for product in reaction['enz_summary']['substrates']]
         for substrate in substrates:
             substrate.update(
-                {'img': generate_chem_inchi(substrate['InChI'], 300, 150)})
+                {'img': generate_chem_inchi(substrate['InChI'], 500, 150)})
         rxn_img = generate_reaction(substrates, products)
         filter_apply = FILTER_APPLY.get(rxn_id, [])
         if filter_apply:
