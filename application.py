@@ -200,9 +200,6 @@ def main():
         initialize(int(act_port), file_suffix)
         app.run(host='0.0.0.0', port=int(myport), debug=True)
         return
-    elif len(sys.argv) == 1:
-        app.run(debug=True)  # debug=True will run with reloader enabled
-        return
     print 'Wrong number of arguments. Usage: python application.py [port] [file suffix] [db port]'
     print 'Example: python application.py 27330 brenda 27334'
 

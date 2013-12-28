@@ -227,7 +227,7 @@ def get_sentence(sid):
     paper = get_pubmed().find_one({'MedlineCitation.PMID': pmid})
     abstract = cleanAbstract(paper)
     sentences = splitSentences(abstract)
-    return sentences[index]
+    return sentences[int(index)]
 
 
 def pluralize(singular):
