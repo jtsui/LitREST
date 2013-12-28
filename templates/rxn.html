@@ -53,12 +53,18 @@
   <h4>Literature Sources</h4>
   {% for res in reaction['metadata'] %}
   <table class="table table-condensed table-hover table-bordered">
-    {% for k, v in res.iteritems() %}
-      <tr>
-        <td>{{ k }}</td>
-        <td>{{ v }}</td>
-      </tr>
-    {% endfor %}
+    <tr>
+      <td>SID</td>
+      <td>{{ res['sid']  }}</td>
+    </tr>
+    <tr>
+      <td>Sentence</td>
+      <td>{{ res['sentence']  }}</td>
+    </tr>
+    <tr>
+      <td>Pattern ID</td>
+      <td>{{ res['sentence']  }}</td>
+    </tr>
   </table>
   {% endfor %}
 </div>  
@@ -85,7 +91,7 @@
     </tr>
     <tr>
       <td>names</td>
-      <td>{{ chemical['names']['synonyms']|join(', ')  }}</td>
+      <td><font size="1"> {{ chemical['names']['synonyms']|join(', ')  }}</font></td>
     </tr>
     <tr>
       <td>structure</td>
@@ -118,7 +124,7 @@
     </tr>
     <tr>
       <td>names</td>
-      <td>{{ chemical['names']['synonyms']|join(', ')  }}</td>
+      <td><font size="1">{{ chemical['names']['synonyms']|join(', ')  }}</font></td>
     </tr>
     <tr>
       <td>structure</td>

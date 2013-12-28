@@ -140,18 +140,26 @@ def rxn(rxn_id=None):
     if rxn_id:
         reaction = get_reaction_db().find_one({'_id': long(rxn_id)})
         for data in reaction['metadata']:
-            data['sentence'] = parse_utils.get_sentence(data['sid'])
+            sentence = parse_utils.get_sentence(data['sid'])
+            for chem in sorted(data['substrates'], key=len):
+                sentence = (' %s ' % sentence).replace(
+                    ' %s ' % chem, ' <font color="red">%s</font> ' % chem)
+            for chem in sorted(data['products'], key=len):
+                sentence = (' %s ' % sentence).replace(
+                    ' %s ' % chem, ' <font color="blue">%s</font> ' % chem)
+            data['sentence'] = sentence.strip()
+            print data
     if reaction:
         products = [get_chem_db().find_one(product['pubchem'])
                     for product in reaction['enz_summary']['products']]
         for product in products:
             product.update(
-                {'img': generate_chem_inchi(product['InChI'], 250, 250)})
+                {'img': generate_chem_inchi(product['InChI'], 300, 150)})
         substrates = [get_chem_db().find_one(product['pubchem'])
                       for product in reaction['enz_summary']['substrates']]
         for substrate in substrates:
             substrate.update(
-                {'img': generate_chem_inchi(substrate['InChI'], 250, 250)})
+                {'img': generate_chem_inchi(substrate['InChI'], 300, 150)})
         rxn_img = generate_reaction(substrates, products)
         filter_apply = FILTER_APPLY.get(rxn_id, [])
         if filter_apply:
