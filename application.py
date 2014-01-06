@@ -161,19 +161,33 @@ def rxn(rxn_id=None):
                 {'img': generate_chem_inchi(substrate['InChI'], 500, 150)})
         rxn_img = generate_reaction(substrates, products)
         filter_apply = FILTER_APPLY.get(rxn_id, [])
-        if filter_apply:
-            filter_apply = {'input': filter_apply[0],
-                            'inputimg': generate_chems_smiles(filter_apply[0]),
-                            'ero': filter_apply[1],
-                            'eroimg': generate_ero(get_ero_db().find_one({'_id': filter_apply[1]})['readable'].strip('{').strip('}').strip()),
-                            'result': [(x, generate_chems_smiles(x)) for x in filter_apply[2] if x],
-                            }
+        display_filter_apply = []
+        for res in filter_apply:
+            display = {}
+            display['input'] = res[0]
+            display['input_img'] = generate_chems_smiles(res[0])
+            display['ero_id'] = res[1]
+            ero = get_ero_db().find_one({'_id': res[1]})['readable']
+            ero_string = ero.strip('{').strip('}').strip()
+            display['ero_img'] = generate_ero(ero_string)
+            display['result_img'] = generate_chems_smiles(res[2])
+            display['result'] = res[2]
+            print res[2]
+            display_filter_apply.append(display)
         filter_infer = FILTER_INFER.get(rxn_id, [])
         for res in filter_infer:
             if 'ERO' in res:
                 res['EROIMG'] = generate_ero(
                     res['ERO'].strip('{').strip('}').strip())
-    return render_template('rxn.html', reaction=reaction, substrates=substrates, products=products, rxn_img=rxn_img, filter_infer=filter_infer, filter_apply=filter_apply, report_reactions=REPORT_REACTIONS, reaction_categories=REACTION_CATEGORIES)
+    return render_template('rxn.html',
+                           reaction=reaction,
+                           substrates=substrates,
+                           products=products,
+                           rxn_img=rxn_img,
+                           filter_infer=filter_infer,
+                           filter_apply=display_filter_apply,
+                           report_reactions=REPORT_REACTIONS,
+                           reaction_categories=REACTION_CATEGORIES)
 
 
 @app.route('/_getrxnids')

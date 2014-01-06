@@ -162,37 +162,46 @@
 <div class="well">
 <h4>Results from Applying ERO</h4>
   {% if filter_apply %}
-    <table class="table table-condensed table-hover table-bordered">
-      <tr>
-        <td>Input</td>
-        <td>
-          <table border="0">
-            <tr><td><img src="{{ filter_apply['inputimg'] }}"></td></tr>
-            <tr><td>{{ filter_apply['input'] }}</td></tr>
-          </table>
-        </td>
-      </tr>
-      <tr>
-        <td>ERO</td>
-        <td>
-          <table border="0">
-            <tr><td><img src="{{ filter_apply['eroimg'] }}"></td></tr>
-            <tr><td>{{ filter_apply['ero'] }}</td></tr>
-          </table>
-        </td>
-      </tr>
-      <tr>
-        <td>Result</td>
-        {% for res in filter_apply['result'] %}
+    {% for res in filter_apply %}
+      <table class="table table-condensed table-hover table-bordered">
+        <tr>
+          <td>Input</td>
           <td>
-            <table border="0">
-              <tr><td><img src="{{ res[1] }}"></td></tr>
-              <tr><td>{{ res[0] }}</td></tr>
-            </table>
+            <img src="{{ res['input_img'] }}">
           </td>
-        {% endfor %}
-      </tr>
-    </table>
+        </tr>
+        <tr>
+          <td>Input SMILES</td>
+          <td>
+            {{ res['input'] }}
+          </td>
+        </tr>
+        <tr>
+          <td>ERO</td>
+          <td>
+            <img src="{{ res['ero_img'] }}">
+          </td>
+        </tr>
+        <tr>
+          <td>ERO ID</td>
+          <td>
+            {{ res['ero_id'] }}
+          </td>
+        </tr>
+        <tr>
+          <td>Result</td>
+          <td>
+            <img src="{{ res['result_img'] }}">
+          </td>
+        </tr>
+        <tr>
+          <td>Result SMILES</td>
+          <td>
+            {{ res['result'] }}
+          </td>
+        </tr>
+      </table>
+    {% endfor %}
   {% else %}
     None
   {% endif %}
