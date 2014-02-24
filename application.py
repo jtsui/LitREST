@@ -139,7 +139,7 @@ def rxn(rxn_id=None):
     reaction, substrates, products, rxn_img, filter_apply, filter_infer = None, None, None, None, None, None
     if rxn_id:
         reaction = get_reaction_db().find_one({'_id': long(rxn_id)})
-        for data in reaction['metadata']:
+        for data in reaction.get('metadata', []):
             sentence = parse_utils.get_sentence(data['sid'])
             for chem in sorted(data['substrates'], key=len):
                 sentence = (' %s ' % sentence).replace(
